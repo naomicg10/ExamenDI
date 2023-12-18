@@ -2,12 +2,15 @@ package com.example.examendi;
 
 import javafx.beans.property.SimpleStringProperty;
 import javafx.event.ActionEvent;
+import javafx.event.Event;
+import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 import javafx.util.StringConverter;
 
 import java.net.URL;
 import java.time.LocalDate;
+import java.time.Period;
 import java.util.Date;
 import java.util.ResourceBundle;
 
@@ -15,9 +18,9 @@ public class ParkingCesur implements Initializable {
     @javafx.fxml.FXML
     private TextField txtMatricula;
     @javafx.fxml.FXML
-    private ChoiceBox<String> choiceModelo;
-    @javafx.fxml.FXML
     private ChoiceBox<Cliente> choiceCliente;
+    @javafx.fxml.FXML
+    private ComboBox<String> comboModelo;
     @javafx.fxml.FXML
     private RadioButton radioStandard;
     @javafx.fxml.FXML
@@ -50,29 +53,54 @@ public class ParkingCesur implements Initializable {
     private TableColumn<Parking, String> cCoste;
     @javafx.fxml.FXML
     private TableView tabla;
-
-
     @javafx.fxml.FXML
+    private Label labelInfo;
+    @FXML
+    private ToggleGroup tarifa;
+
+
+    @FXML
     public void añadir(ActionEvent actionEvent) {
-        LocalDate fechaSeleccionada = dateEntrada.getValue();
-        Date fechaParseada = java.sql.Date.valueOf(fechaSeleccionada);
-        LocalDate fechaSeleccionada2 = dateSalida.getValue();
-        Date fechaParseada2 = java.sql.Date.valueOf(fechaSeleccionada2);
-        if(!txtMatricula.getText().isEmpty()){
+        if(!txtMatricula.getText().isEmpty() && comboModelo.getValue() != null && choiceCliente.getValue() != null
+        && dateEntrada.getValue() != null && dateSalida.getValue() != null && (radioStandard.isSelected()
+        || radioOferta.isSelected() || radioLargaDuracion.isSelected())){
+            LocalDate fechaSeleccionada = dateEntrada.getValue();
+            LocalDate fechaSeleccionada2 = dateSalida.getValue();
+            Period periodo = Period.between(fechaSeleccionada, fechaSeleccionada2);
+            Integer dias = periodo.getDays();
+            double precio = 0;
+            String tarifaSeleccionada = "";
+            if (radioStandard.isSelected()) {
+                precio = 8;
+                tarifaSeleccionada = "Standard";
+            } else if (radioOferta.isSelected()) {
+                precio = 6;
+                tarifaSeleccionada = "Oferta";
+            } else if (radioLargaDuracion.isSelected()) {
+                precio = 2;
+                tarifaSeleccionada = "Larga Duración";
+            }
+            double coste = dias * precio;
+
             Parking parking = new Parking();
             parking.setMatricula(txtMatricula.getText());
-            parking.setModelo(choiceModelo.getSelectionModel().getSelectedItem());
+            parking.setModelo(comboModelo.getSelectionModel().getSelectedItem());
             parking.setCliente(choiceCliente.getSelectionModel().getSelectedItem());
-            if (radioStandard.isSelected()) {
-                parking.setTarifa(radioStandard.getText());
-            } else if (radioOferta.isSelected()) {
-                parking.setTarifa(radioOferta.getText());
-            } else if (radioLargaDuracion.isSelected()) {
-                parking.setTarifa(radioLargaDuracion.getText());
-            }
-            parking.setEntrada(fechaParseada);
-            parking.setSalida(fechaParseada2);
+            parking.setTarifa(tarifaSeleccionada);
+            parking.setCoste((int) coste);
+            parking.setEntrada(fechaSeleccionada);
+            parking.setSalida(fechaSeleccionada2);
             tabla.getItems().add(parking);
+
+            labelCoste.setText(coste +" €");
+
+            limpiar();
+        } else {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Error");
+            alert.setHeaderText("¡ERROR!");
+            alert.setContentText("Campos incompletos");
+            alert.showAndWait();
         }
     }
 
@@ -113,13 +141,11 @@ public class ParkingCesur implements Initializable {
             return new SimpleStringProperty( coste );
         });
 
+        comboModelo.getItems().addAll("Bmw", "Audi", "Cupra");
+
         Cliente cliente1 = new Cliente(1, "Naomi", "naomicg4@gmail.com");
         Cliente cliente2 = new Cliente(2, "Carlos", "carlos@gmail.com");
         Cliente cliente3 = new Cliente(3, "Jose", "jose@gmail.com");
-
-        choiceModelo.getItems().addAll("Bmw", "Audi", "Cupra");
-        choiceCliente.getItems().addAll(cliente1, cliente2, cliente3);
-
         choiceCliente.setConverter(new StringConverter<Cliente>() {
             @Override
             public String toString(Cliente cliente) {
@@ -132,17 +158,25 @@ public class ParkingCesur implements Initializable {
                 return null;
             }
         });
-        ToggleGroup tarifaToggleGroup = new ToggleGroup();
+        choiceCliente.getItems().addAll(cliente1, cliente2, cliente3);
+    }
 
-        RadioButton radioStandard = new RadioButton("Tarifa Estándar");
-        radioStandard.setToggleGroup(tarifaToggleGroup);
+    private void limpiar() {
+        txtMatricula.clear();
+        comboModelo.setValue(null);
+        choiceCliente.setValue(null);
+        dateEntrada.setValue(null);
+        dateSalida.setValue(null);
+        radioStandard.setSelected(false);
+        radioOferta.setSelected(false);
+        radioLargaDuracion.setSelected(false);
+    }
 
-        RadioButton radioOferta = new RadioButton("Tarifa de Oferta");
-        radioOferta.setToggleGroup(tarifaToggleGroup);
-
-        RadioButton radioLargaDuracion = new RadioButton("Tarifa Larga Duración");
-        radioLargaDuracion.setToggleGroup(tarifaToggleGroup);
-
-
+    @javafx.fxml.FXML
+    public void info(Event event) {
+        Alert alerta=new Alert(Alert.AlertType.INFORMATION);
+        alerta.setTitle("Información");
+        alerta.setHeaderText("Naomi Camuña González 2ºDAM");
+        alerta.showAndWait();
     }
 }

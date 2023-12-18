@@ -1,5 +1,6 @@
 package com.example.examendi;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -9,12 +10,12 @@ public class Parking {
     private String modelo;
     private Cliente cliente;
     private String tarifa;
-    private Date entrada;
-    private Date salida;
+    private LocalDate entrada;
+    private LocalDate salida;
     private Integer coste;
     private List<String> tarifas = new ArrayList<>();
 
-    public Parking(String matricula, String modelo, Cliente cliente, String tarifa, Date entrada, Date salida, Integer coste) {
+    public Parking(String matricula, String modelo, Cliente cliente, String tarifa, LocalDate entrada, LocalDate salida, Integer coste) {
         this.matricula = matricula;
         this.modelo = modelo;
         this.cliente = cliente;
@@ -49,11 +50,11 @@ public class Parking {
         return this.tarifa;
     }
 
-    public Date getEntrada() {
+    public LocalDate getEntrada() {
         return this.entrada;
     }
 
-    public Date getSalida() {
+    public LocalDate getSalida() {
         return this.salida;
     }
 
@@ -77,11 +78,11 @@ public class Parking {
         this.tarifa = tarifa;
     }
 
-    public void setEntrada(Date entrada) {
+    public void setEntrada(LocalDate entrada) {
         this.entrada = entrada;
     }
 
-    public void setSalida(Date salida) {
+    public void setSalida(LocalDate salida) {
         this.salida = salida;
     }
 
